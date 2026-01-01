@@ -1,12 +1,12 @@
-import { atbash } from "../utils/functions.js";
+import { atbash, shuffleWord} from "../utils/functions.js";
 
 export const encryptMessage = async (req, res) => {
   try {
  
     const {username, password, message, cipherType} = req.body
 
-    if (!username || !password ){
-        res.status(400).json({ success: false, msg: "you must insert username and password"});
+    if (!username || !password || !message || !cipherType){
+        res.status(400).json({ success: false, msg: "you must insert all fields"});
     }
     const mongoConn = req.mongoConn;
     const usersCollection = mongoConn.collection("users");
@@ -15,12 +15,18 @@ export const encryptMessage = async (req, res) => {
     if (!user){
         res.status(404).json({ success: false, data: req.body });
     }
-    let encryptedMessage;
-    if (cipherType.toUpperCase() === "REVERSE"){
-        encryptedMessage = message.split("").reverse().join("")
-    } else if (cipherType.toUpperCase()=== "ATBASH"){
+    let encryptedMessage
+
+    
+    if (cipherType.toUpperCase()=== "ATBASH"){
         encryptedMessage = atbash(message)
+    } else if (cipherType.toUpperCase() === "RANDOM_SHUFFLE"){
+        encryptedMessage = shuffleWord(message)
+    } else {
+        
+        encryptedMessage = message.split("").reverse().join("")
     }
+
 
     const [result] = await req.mysqlConn.query(
       "INSERT INTO messages (username, cipher_type, encrypted_text) VALUES (?, ?, ?)",
@@ -64,6 +70,9 @@ export const decryptMessage = async (req, res) => {
     }
     else if (result[0].cipher_type.toUpperCase() === "ATBASH"){
         decryptedMessage = atbash(encryptedMessage)
+    }
+    else if (result[0].cipher_type.toUpperCase() === "RANDOM_SHUFFLE"){
+        decryptedMessage  = encryptedMessage
     }
    
    
