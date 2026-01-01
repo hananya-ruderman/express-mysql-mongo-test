@@ -1,0 +1,30 @@
+{
+  "name": "express-mysql-mongo-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hananya-ruderman/express-mysql-mongo-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/hananya-ruderman/express-mysql-mongo-test/issues"
+  },
+  "homepage": "https://github.com/hananya-ruderman/express-mysql-mongo-test#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongodb": "^7.0.0",
+    "mysql2": "^3.16.0",
+    "nodemon": "^3.1.11"
+  }
+}
