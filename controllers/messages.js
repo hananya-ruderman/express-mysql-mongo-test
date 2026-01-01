@@ -1,4 +1,4 @@
-
+import { atbash } from "../utils/functions.js";
 
 export const encryptMessage = async (req, res) => {
   try {
@@ -15,21 +15,25 @@ export const encryptMessage = async (req, res) => {
     if (!user){
         res.status(404).json({ success: false, data: req.body });
     }
+    let encryptedMessage;
+    if (cipherType.toUpperCase() === "REVERSE"){
+        encryptedMessage = message.split("").reverse().join("")
+    } else if (cipherType.toUpperCase()=== "ATBASH"){
+        encryptedMessage = atbash(message)
+    }
 
-    
-    const encyptedRevers = message.split("").reverse().join("")
     const [result] = await req.mysqlConn.query(
       "INSERT INTO messages (username, cipher_type, encrypted_text) VALUES (?, ?, ?)",
       [
         username,
         cipherType,
-        encyptedRevers
+        encryptedMessage
       ]
     );
    
     const messageId = result.insertId
     await usersCollection.updateOne({username: username}, {$inc: {encryptedMessagesCount: 1}})
-    res.status(201).json({ msg: "success", id: messageId, cipherType: cipherType, encryptedText: encyptedRevers});
+    res.status(201).json({ msg: "success", id: messageId, cipherType: cipherType, encryptedText: encryptedMessage});
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "error" + err.message, data: null });
@@ -54,11 +58,17 @@ export const decryptMessage = async (req, res) => {
     }
     const [result] = await req.mysqlConn.query("SELECT * FROM messages WHERE id = ?;", messageid)
     const encryptedMessage = result[0].encrypted_text
-    const decryptedRevers = encryptedMessage.split("").reverse().join("")
+    let decryptedMessage;
+    if (result[0].cipher_type.toUpperCase() == "REVERSE"){
+        decryptedMessage = encryptedMessage.split("").reverse().join("")
+    }
+    else if (result[0].cipher_type.toUpperCase() === "ATBASH"){
+        decryptedMessage = atbash(encryptedMessage)
+    }
    
    
-    const messageId = result[0].insertId
-    res.status(201).json({ msg: "success", id: messageId, decryptedMessage: decryptedRevers});
+    const messageId = result[0].id
+    res.status(201).json({ msg: "success", id: messageId, decryptedMessage: decryptedMessage});
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "error" + err.message, data: null });
